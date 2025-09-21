@@ -2,14 +2,24 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const router=express.Router()
+const {dataMiddleware}=require('./middlewares/middleware')
 const cartRouter=require('./routes/cartrouter')
+const categoeyRouter=require('./routes/categoryrouter')
 
-app.use(express.json());
+//middleware
+app.use(dataMiddleware);
+
+
+//routes
 
 app.use('/cart',cartRouter)
+app.use('/category',categoeyRouter)
 
 
-mongoose.connect("mongodb://127.0.0.1:27017/electronics_web", {
+
+
+//connect mongodb atlas
+mongoose.connect("mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics_web", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
