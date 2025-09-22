@@ -19,7 +19,7 @@ app.use('/category',categoeyRouter)
 
 
 //connect mongodb atlas
-mongoose.connect("mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics_web", {
+mongoose.connect("mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
