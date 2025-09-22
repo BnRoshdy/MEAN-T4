@@ -1,6 +1,10 @@
 const express = require("express");
-const dataMiddleware=express.json()
+const cors = require("cors");
+const dataMiddleware = express.json();
 
+const corsMiddleware = cors({
+  origin: "*",
+//   credentials: true
+});
 
-
-module.exports={dataMiddleware}
+module.exports = { dataMiddleware, corsMiddleware };
