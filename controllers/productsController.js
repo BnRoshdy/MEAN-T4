@@ -1,28 +1,10 @@
 import express from "express"
-import { MongoClient, ObjectId } from "mongodb"
 import cors from "cors"
 const app = express()
-const PORT = 3000
-const MONGODB_URI = "mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics_web?retryWrites=true&w=majority";
 app.use(cors())
 app.use(express.json())
 
 
-let db
-async function startServer() {
-  try {
-    const client = await MongoClient.connect(MONGODB_URI)
-    console.log("Connected to MongoDB")
-    db = client.db()
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`)
-    })
-  } catch (error) {
-    console.error("Failed to connect to MongoDB and start server:", error)
-    process.exit(1) 
-  }
-}
 
 
 app.get("/api/products", async (req, res) => {
