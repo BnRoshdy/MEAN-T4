@@ -3,7 +3,7 @@ import { MongoClient, ObjectId } from "mongodb"
 import cors from "cors"
 const app = express()
 const PORT = 3000
-const MONGODB_URI = "mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics_web?retryWrites=true&w=majority";
 app.use(cors())
 app.use(express.json())
 
