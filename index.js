@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const router=express.Router()
 const {dataMiddleware}=require('./middlewares/middleware')
 const cartRouter=require('./routes/cartrouter')
+const userRouter=require('./routes/usersrouter')
 const categoeyRouter=require('./routes/categoryrouter')
 app.use(express.json());
 
@@ -14,6 +15,7 @@ app.use(dataMiddleware);
 //routes
 app.use('/cart',cartRouter)
 app.use('/category',categoeyRouter)
+app.use('/user',userRouter)
 
 
 //connect mongodb atlas
