@@ -19,8 +19,10 @@
   },
   "homepage": "https://github.com/BnRoshdy/MEAN-T4#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
     "nodemon": "^3.1.10"
   }
