@@ -1,15 +1,17 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const router=express.Router()
-const {dataMiddleware}=require('./middlewares/middleware')
+const {dataMiddleware,corsMiddleware}=require('./middlewares/middleware')
 const cartRouter=require('./routes/cartrouter')
 const userRouter=require('./routes/usersrouter')
 const categoeyRouter=require('./routes/categoryrouter')
+require("dotenv").config();
 
 //middleware
 
 app.use(dataMiddleware);
+app.use(corsMiddleware)
+
 
 
 //routes
@@ -19,7 +21,7 @@ app.use('/user',userRouter)
 
 
 //connect mongodb atlas
-mongoose.connect("mongodb+srv://selshenawy69_db_user:DuTikBeEzvyxhryQ@mean-t4.v8igppx.mongodb.net/electronics_web", {
+mongoose.connect(process.env.mongo_url, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
