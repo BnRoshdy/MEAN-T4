@@ -6,9 +6,9 @@ const {dataMiddleware}=require('./middlewares/middleware')
 const cartRouter=require('./routes/cartrouter')
 const userRouter=require('./routes/usersrouter')
 const categoeyRouter=require('./routes/categoryrouter')
-app.use(express.json());
 
 //middleware
+
 app.use(dataMiddleware);
 
 
