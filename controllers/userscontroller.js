@@ -1,10 +1,8 @@
 const User = require("./models/user.js")
 
 
-//create a schema
-app.post("/addUser", async (req,res) => {
+const addUser=async (req,res) => {
 
-  // Validate required fields
   if (!fname || !lname || !email || !password) {
     return res.status(400).json({ error: "All fields (fname, lname, email, password) are required" });
   }
@@ -21,24 +19,27 @@ app.post("/addUser", async (req,res) => {
 
     console.log(newUser);
     
-    // the way to wait untile save it in DB
     await newUser.save()
     res.json(newUser)
-    // res.send("the new article hass been stored")
 
   } catch (error) {
       console.log("Error while reading article id", id);
       return res.send("Error")
   }
 
-})
+}
 
-app.get("/getAllUsers", async (req,res) =>{
+const getallUsers= async (req,res) =>{
     const users = await User.find()
     res.json(users)
-})
+}
 
-app.get("/users/:userID", async (req,res) =>{
+
+
+
+
+
+ const getUserbyID=async (req,res) =>{
     const id = req.params.userID
 
     try {
@@ -49,9 +50,9 @@ app.get("/users/:userID", async (req,res) =>{
         console.log("Error while reading user id", id);
         return res.send("Error")
     }
-})
+}
 
-app.delete("/users/:userID", async (req,res) =>{
+const deleteUserbyID= async (req,res) =>{
     const id = req.params.userID
 
     try {
@@ -62,4 +63,8 @@ app.delete("/users/:userID", async (req,res) =>{
         console.log("Error while reading user id", id);
         return res.send("Error")
     }
-})
+}
+
+
+
+module.exports={addUser,deleteUserbyID, getUserbyID,getallUsers}
