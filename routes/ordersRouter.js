@@ -5,9 +5,9 @@ const  { authMiddleware, restrictTo }=require('../auth/auth')
 
 let {createCashOrder,getSpecificOrder,getAllOrders}=require('../controllers/orders')
 
-router.get('/all',authMiddleware,restrictTo('admin'),getAllOrders)
-router.post('/orders/:id',authMiddleware,restrictTo("admin",'user'),createCashOrder)
-router.get('/specific/:id',authMiddleware,restrictTo('user',"admin"),getSpecificOrder)
+router.get('/all',authMiddleware,restrictTo('user'),getAllOrders)
+router.post('/orders/:id',authMiddleware,restrictTo('user'),createCashOrder)
+router.get('/specific/:id',authMiddleware,restrictTo('user'),getSpecificOrder)
 
 
 module.exports=router
