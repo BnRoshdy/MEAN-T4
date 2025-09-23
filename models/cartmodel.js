@@ -7,19 +7,40 @@ const cartSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product", 
-      required: true,
-    },
-    name: {
+      cartItems: [
+        {
+            productId: {
+                type: mongoose.Schema.ObjectId,
+                ref: "product",
+            },
+            quantity: {
+                type: Number,
+                default: 1,
+            },
+            price: Number,
+        },
+        ],
+        totalPrice: Number,
+        totalPriceAfterDiscount: Number,
+        discount:Number,
+        name: {
       type: String,
       // required: true,
     },
-    quantity: {
-      type: Number,
-      default: 1,
-    },
+
+    // productId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Product", 
+    //   required: true,
+    // },
+
+    
+
+    // quantity: {
+    //   type: Number,
+    //   default: 1,
+    // },
+
   },
   { timestamps: true }
 );
