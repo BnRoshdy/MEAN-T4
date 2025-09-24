@@ -1,11 +1,9 @@
-import express from "express"
-const app = express()
-app.use(express.json())
+const mongoose = require("mongoose")
+const Product = require('../models/productmodel') 
 
 
 
-
-app.get("/api/products", async (req, res) => {
+const get_all_products = async (req, res) => {
   try {
     const {
       category,
@@ -18,7 +16,6 @@ app.get("/api/products", async (req, res) => {
       sortBy = "createdAt",
       sortOrder = "desc",
     } = req.query
-
 
     const filter = {}
 
@@ -33,53 +30,50 @@ app.get("/api/products", async (req, res) => {
     }
     if (minPrice || maxPrice) {
       filter.price = {}
-      if (minPrice) filter.price.$gte = Number.parseFloat(minPrice)
-      if (maxPrice) filter.price.$lte = Number.parseFloat(maxPrice)
+      if (minPrice) filter.price.$gte = parseFloat(minPrice)
+      if (maxPrice) filter.price.$lte = parseFloat(maxPrice)
     }
-
 
     const sort = {}
     sort[sortBy] = sortOrder === "asc" ? 1 : -1
 
-    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+    const skip = (parseInt(page) - 1) * parseInt(limit)
 
-    const products = await db
-      .collection("products")
-      .find(filter)
+    const products = await Product.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(Number.parseInt(limit))
-      .toArray()
+      .limit(parseInt(limit))
 
-    const totalProducts = await db.collection("products").countDocuments(filter)
-    const totalPages = Math.ceil(totalProducts / Number.parseInt(limit))
+    const totalProducts = await Product.countDocuments(filter)
+    const totalPages = Math.ceil(totalProducts / parseInt(limit))
 
     res.json({
       success: true,
       data: products,
       pagination: {
-        currentPage: Number.parseInt(page),
+        currentPage: parseInt(page),
         totalPages,
         totalProducts,
-        hasNextPage: Number.parseInt(page) < totalPages,
-        hasPrevPage: Number.parseInt(page) > 1,
+        hasNextPage: parseInt(page) < totalPages,
+        hasPrevPage: parseInt(page) > 1,
       },
     })
   } catch (error) {
     console.error("Error fetching products:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-app.get("/api/products/:id", async (req, res) => {
+
+const get_product_byId = async (req, res) => {
   try {
     const { id } = req.params
 
-    if (!ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid product ID" })
     }
 
-    const product = await db.collection("products").findOne({ _id: new ObjectId(id) })
+    const product = await Product.findById(id)
 
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" })
@@ -90,10 +84,9 @@ app.get("/api/products/:id", async (req, res) => {
     console.error("Error fetching product:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-app.post("/api/products", async (req, res) => {
+const add_product = async (req, res) => {
   try {
     const { name, description, price, category, brand, images, specifications, stock, sku, featured = false } = req.body
 
@@ -105,39 +98,30 @@ app.post("/api/products", async (req, res) => {
     }
 
     if (price <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Price must be greater than 0",
-      })
+      return res.status(400).json({ success: false, message: "Price must be greater than 0" })
     }
 
     if (sku) {
-      const existingProduct = await db.collection("products").findOne({ sku })
+      const existingProduct = await Product.findOne({ sku })
       if (existingProduct) {
-        return res.status(400).json({
-          success: false,
-          message: "Product with this SKU already exists",
-        })
+        return res.status(400).json({ success: false, message: "Product with this SKU already exists" })
       }
     }
 
-    const newProduct = {
+    const newProduct = new Product({
       name,
       description,
-      price: Number.parseFloat(price),
+      price: parseFloat(price),
       category,
       brand,
       images: images || [],
       specifications: specifications || {},
-      stock: Number.parseInt(stock) || 0,
+      stock: parseInt(stock) || 0,
       sku: sku || `SKU-${Date.now()}`,
       featured,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
+    })
 
-    const result = await db.collection("products").insertOne(newProduct)
-    const createdProduct = await db.collection("products").findOne({ _id: result.insertedId })
+    const createdProduct = await newProduct.save()
 
     res.status(201).json({
       success: true,
@@ -148,122 +132,95 @@ app.post("/api/products", async (req, res) => {
     console.error("Error creating product:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-app.put("/api/products/:id", async (req, res) => {
+const edit_product_id = async (req, res) => {
   try {
     const { id } = req.params
 
-    if (!ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid product ID" })
     }
 
-    const updateData = { ...req.body }
-    delete updateData._id 
-    updateData.updatedAt = new Date()
+    const updateData = { ...req.body, updatedAt: new Date() }
+    delete updateData._id
 
     if (updateData.price && updateData.price <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Price must be greater than 0",
-      })
+      return res.status(400).json({ success: false, message: "Price must be greater than 0" })
     }
 
-
     if (updateData.sku) {
-      const existingProduct = await db.collection("products").findOne({
-        sku: updateData.sku,
-        _id: { $ne: new ObjectId(id) },
-      })
+      const existingProduct = await Product.findOne({ sku: updateData.sku, _id: { $ne: id } })
       if (existingProduct) {
-        return res.status(400).json({
-          success: false,
-          message: "Product with this SKU already exists",
-        })
+        return res.status(400).json({ success: false, message: "Product with this SKU already exists" })
       }
     }
 
-    const result = await db.collection("products").updateOne({ _id: new ObjectId(id) }, { $set: updateData })
+    const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updateData }, { new: true })
 
-    if (result.matchedCount === 0) {
+    if (!updatedProduct) {
       return res.status(404).json({ success: false, message: "Product not found" })
     }
 
-    const updatedProduct = await db.collection("products").findOne({ _id: new ObjectId(id) })
-
-    res.json({
-      success: true,
-      message: "Product updated successfully",
-      data: updatedProduct,
-    })
+    res.json({ success: true, message: "Product updated successfully", data: updatedProduct })
   } catch (error) {
     console.error("Error updating product:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-app.delete("/api/products/:id", async (req, res) => {
+const delete_product_id = async (req, res) => {
   try {
     const { id } = req.params
 
-    if (!ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid product ID" })
     }
 
-    const result = await db.collection("products").deleteOne({ _id: new ObjectId(id) })
+    const deletedProduct = await Product.findByIdAndDelete(id)
 
-    if (result.deletedCount === 0) {
+    if (!deletedProduct) {
       return res.status(404).json({ success: false, message: "Product not found" })
     }
 
-    res.json({
-      success: true,
-      message: "Product deleted successfully",
-    })
+    res.json({ success: true, message: "Product deleted successfully" })
   } catch (error) {
     console.error("Error deleting product:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-app.get("/api/products/categories", async (req, res) => {
+const get_all_categories_products = async (req, res) => {
   try {
-    const categories = await db.collection("products").distinct("category")
+    const categories = await Product.distinct("category")
     res.json({ success: true, data: categories })
   } catch (error) {
     console.error("Error fetching categories:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-app.get("/api/products/brands", async (req, res) => {
+const get_all_brands = async (req, res) => {
   try {
-    const brands = await db.collection("products").distinct("brand")
+    const brands = await Product.distinct("brand")
     res.json({ success: true, data: brands })
   } catch (error) {
     console.error("Error fetching brands:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-app.patch("/api/products/:id/stock", async (req, res) => {
+const update_stock_product = async (req, res) => {
   try {
     const { id } = req.params
     const { stock, operation = "set" } = req.body
 
-    if (!ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid product ID" })
     }
 
     if (typeof stock !== "number" || stock < 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Stock must be a non-negative number",
-      })
+      return res.status(400).json({ success: false, message: "Stock must be a non-negative number" })
     }
 
     let updateOperation
@@ -277,26 +234,26 @@ app.patch("/api/products/:id/stock", async (req, res) => {
 
     updateOperation.$set = { ...updateOperation.$set, updatedAt: new Date() }
 
-    const result = await db.collection("products").updateOne({ _id: new ObjectId(id) }, updateOperation)
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateOperation, { new: true })
 
-    if (result.matchedCount === 0) {
+    if (!updatedProduct) {
       return res.status(404).json({ success: false, message: "Product not found" })
     }
 
-    const updatedProduct = await db.collection("products").findOne({ _id: new ObjectId(id) })
-
-    res.json({
-      success: true,
-      message: "Stock updated successfully",
-      data: updatedProduct,
-    })
+    res.json({ success: true, message: "Stock updated successfully", data: updatedProduct })
   } catch (error) {
     console.error("Error updating stock:", error)
     res.status(500).json({ success: false, message: "Server error" })
   }
-})
+}
 
-
-startServer() 
-
-export default app
+module.exports = {
+  get_all_products,
+  get_product_byId,
+  add_product,
+  edit_product_id,
+  delete_product_id,
+  get_all_categories_products,
+  get_all_brands,
+  update_stock_product,
+}

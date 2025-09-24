@@ -14,10 +14,6 @@ router.delete('/edit_cart/:id', delete_cart)
 
 
 
-//  authMiddleware,retrictTo("user", "admin"),
-// authMiddleware,retrictTo("user", "admin"),
-//  authMiddleware,retrictTo("user", "admin"),
-// authMiddleware,retrictTo("user", "admin"),
 
 
 module.exports=router
