@@ -1,6 +1,5 @@
 const Cart = require('../models/cartmodel');
 const Product = require('../models/productmodel');
-
 const add_to_cart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
@@ -10,32 +9,22 @@ const add_to_cart = async (req, res) => {
     }
 
     const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (product.stock < quantity) {
-      return res.status(400).json({ message: "Not enough stock available" });
-    }
+cartItem = await Cart.create({
+  userId: req.user.id,
+  productId,
+  quantity,
+  productData: {
+    name: product.name,
+    price: product.price,
+    category: product.category,
+    description: product.description,
+    brand: product.brand,
+    images: product.images
+  }
+});
 
-    let cartItem = await Cart.findOne({ userId: req.user.id, productId });
-
-    if (cartItem) {
-      if (product.stock < cartItem.quantity + quantity) {
-        return res.status(400).json({ message: "Not enough stock available" });
-      }
-      cartItem.quantity += quantity;
-      await cartItem.save();
-    } else {
-      cartItem = await Cart.create({
-        userId: req.user.id,
-        productId,
-        quantity,
-      });
-    }
-
-    product.stock -= quantity;
-    await product.save();
 
     res.status(201).json({
       message: "Product added to cart successfully",
@@ -48,32 +37,33 @@ const add_to_cart = async (req, res) => {
 
 const showCart = async (req, res) => {
   try {
-    const cart = await Cart.find({ userId: req.user.id }).populate("productId");
+    const cart = await Cart.find({ userId: req.user.id })
+      .populate("productId"); 
+
     if (cart.length === 0) {
       return res.status(404).json({ message: "Nothing in cart" });
     }
+
     res.status(200).json({ cart });
   } catch (err) {
     res.status(500).json({ message: "Error fetching cart", error: err.message });
   }
 };
 
+
 const edit_quantity_cart = async (req, res) => {
   try {
     const id = req.params.id;
     const { quantity } = req.body;
 
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findById(id).populate("productId");
     if (!cartItem) {
       return res.status(404).json({ message: "Cart item not found" });
     }
 
-    const product = await Product.findById(cartItem.productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    const product = cartItem.productId; 
 
-    const diff = quantity - cartItem.quantity; 
+    const diff = quantity - cartItem.quantity;
 
     if (diff > 0 && product.stock < diff) {
       return res.status(400).json({ message: "Not enough stock" });
@@ -95,12 +85,12 @@ const delete_cart = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const cartItem = await Cart.findById(id);
+    const cartItem = await Cart.findById(id).populate("productId"); 
     if (!cartItem) {
       return res.status(404).json({ message: "Cart item not found" });
     }
 
-    const product = await Product.findById(cartItem.productId);
+    const product = cartItem.productId;
     if (product) {
       product.stock += cartItem.quantity; 
       await product.save();
@@ -108,10 +98,11 @@ const delete_cart = async (req, res) => {
 
     await cartItem.deleteOne();
 
-    res.status(200).json({ message: "Cart deleted successfully" });
+    res.status(200).json({ message: "Cart deleted successfully", cartItem });
   } catch (err) {
     res.status(500).json({ message: "Delete not allowed", error: err.message });
   }
 };
+
 
 module.exports = { add_to_cart, showCart, edit_quantity_cart, delete_cart };
