@@ -5,6 +5,7 @@ const {dataMiddleware,corsMiddleware}=require('./middlewares/middleware')
 const cartRouter=require('./routes/cartrouter')
 const userRouter=require('./routes/usersrouter')
 const categoeyRouter=require('./routes/categoryrouter')
+const productrouter=require('./routes/productrouter')
 require("dotenv").config();
 
 //middleware
@@ -18,6 +19,7 @@ app.use(corsMiddleware)
 app.use('/cart',cartRouter)
 app.use('/category',categoeyRouter)
 app.use('/user',userRouter)
+app.use('/products',productrouter)
 
 
 //connect mongodb atlas

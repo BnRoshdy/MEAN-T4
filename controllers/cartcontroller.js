@@ -1,7 +1,8 @@
 
 const Cart=require('../models/cartmodel')
-// const Product=require('../models/product')
-const add_to_cart = async (req, res) => {
+
+const add_to_cart=
+   async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
@@ -9,28 +10,26 @@ const add_to_cart = async (req, res) => {
       return res.status(400).json({ message: "productId and quantity required" });
     }
 
-    // const product = await Product.findById(productId);
-    // if (!product) {
-    //   return res.status(404).json({ message: "Product not found" });
-    // }
-
     let cartItem = await Cart.findOne({ userId: req.user.id, productId });
 
     if (cartItem) {
-      cartItem.quantity += quantity;
+      cartItem.quantity += quantity; 
       await cartItem.save();
     } else {
       cartItem = await Cart.create({
         userId: req.user.id,
         productId,
         quantity,
-        // name: product.name 
       });
     }
 
-    res.status(201).json({ message: "Item added to cart", cartItem });
+    res.status(201).json({
+      message: "Product added to cart successfully",
+      cartItem,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
+    console.log(err)
   }
 };
 

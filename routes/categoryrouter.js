@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const {add_category,allCategories}=require('../controllers/categorycontroller')
-const {authMiddleware,restrictTo }=require('../auth/auth')
+// const { isAdmin } = require("../middleware/auth");
 
-router.post("/addCategory",authMiddleware,restrictTo ("admin"), add_category);
-router.get("/allCategories",authMiddleware,restrictTo ("admin","user"), allCategories);
+router.post("/addCategory", add_category);
+router.get("/allCategories", allCategories);
 
 
 module.exports = router;
