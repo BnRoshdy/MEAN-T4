@@ -6,6 +6,7 @@ const userRouter=require('./routes/usersrouter')
 const categoeyRouter=require('./routes/categoryrouter')
 const productrouter=require('./routes/productrouter')
 const  { dataMiddleware, corsMiddleware }=require('./middlewares/middleware')
+const ordersRouter=require('./routes/orderrouter')
 
 
 require("dotenv").config();
@@ -22,6 +23,7 @@ app.use('/cart',cartRouter)
 app.use('/category',categoeyRouter)
 app.use('/user',userRouter)
 app.use('/products',productrouter)
+app.use('/order',ordersRouter)
 
 
 
