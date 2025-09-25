@@ -4,7 +4,7 @@ const productModel = require("../models/productmodel");
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await orderModel.find({ userId: req.user._id });
+    const orders = await orderModel.find({ userId: req.user.id });
     res.status(200).json({ message: "success", data: orders });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -14,7 +14,7 @@ const getAllOrders = async (req, res) => {
 const getSpecificOrder = async (req, res) => {
   try {
     const id = req.params.id;
-    const order = await orderModel.findOne({ userId: req.user._id, _id: id });
+    const order = await orderModel.findOne({ userId: req.user.id, _id: id });
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.status(200).json({ message: "success", data: order });
   } catch (err) {
@@ -29,13 +29,15 @@ const createCashOrder = async (req, res) => {
 
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    const cartItems = [
-      {
-        productId: cart.productId,
-        quantity: cart.quantity,
-        price: cart.productData.price,
-      },
-    ];
+    if (!cart.products || cart.products.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    const cartItems = cart.products.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.productData.price,
+    }));
 
     const totalOrderPrice = cartItems.reduce(
       (sum, item) => sum + item.quantity * item.price,
@@ -43,16 +45,18 @@ const createCashOrder = async (req, res) => {
     );
 
     const order = await orderModel.create({
-      userId: req.user.id,  
+      userId: req.user.id,
       cartItems,
       totalOrderPrice,
       shippingAddress: req.body.shippingAddress,
       paymentMethod: "cash",
     });
 
-    await productModel.findByIdAndUpdate(cart.productId, {
-      $inc: { quantity: -cart.quantity, sold: cart.quantity },
-    });
+    for (const item of cart.products) {
+      await productModel.findByIdAndUpdate(item.productId, {
+        $inc: { stock: -item.quantity, sold: item.quantity },
+      });
+    }
 
     await cartModel.findByIdAndDelete(cartId);
 
