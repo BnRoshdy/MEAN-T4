@@ -43,7 +43,7 @@ const createCashOrder = async (req, res) => {
     );
 
     const order = await orderModel.create({
-      userId: req.user._id,  
+      userId: req.user.id,  
       cartItems,
       totalOrderPrice,
       shippingAddress: req.body.shippingAddress,
