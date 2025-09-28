@@ -1,9 +1,6 @@
 const User = require("../models/usermodel")
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const Cart = require("../models/cartmodel");
-const mongoose = require("mongoose")
-
 
 const addUser = async (req, res) => {
   const { fname, lname, email, password, role } = req.body;
@@ -13,7 +10,6 @@ const addUser = async (req, res) => {
       error: "All fields (fname, lname, email, password) are required"
     });
   }
-
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,14 +22,7 @@ const addUser = async (req, res) => {
       role
     });
 
-    const newCart = await Cart.create({
-      userId: newUser._id
-    });
-    await newCart.save();
-
-    newUser.cart = newCart._id;
     await newUser.save();
-
 
     res.status(201).json({ message: "User created successfully", user: newUser });
 
@@ -44,9 +33,9 @@ const addUser = async (req, res) => {
 };
 
 
-const getallUsers = async (req, res) => {
-  const users = await User.find()
-  res.json(users)
+const getallUsers= async (req,res) =>{
+    const users = await User.find()
+    res.json(users)
 }
 
 
@@ -62,9 +51,9 @@ const loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: "Invalid email or password" });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.secret_key,
-      { expiresIn: "1h" }
+      { id: user._id, role: user.role },  
+    process.env.secret_key,                     
+      { expiresIn: "7d" }
     );
 
     res.json({ message: "Login successful", token });
@@ -77,36 +66,32 @@ const loginUser = async (req, res) => {
 
 
 
-const getUserbyID = async (req, res) => {
-  const id = req.params.userID
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, message: "Invalid product ID" })
-  }
-  try {
-    const user = await User.findById(id)
-    res.json(user)
+ const getUserbyID=async (req,res) =>{
+    const id = req.params.userID
 
-  } catch (error) {
-    console.log("Error while reading user id", id);
-    return res.send("Error")
-  }
+    try {
+        const user = await User.findById(id)
+        res.json(user)
+
+    } catch (error) {
+        console.log("Error while reading user id", id);
+        return res.send("Error")
+    }
 }
 
-const deleteUserbyID = async (req, res) => {
-  const id = req.params.userID
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, message: "Invalid product ID" })
-  }
-  try {
-    const user = await User.findByIdAndDelete(id)
-    res.json(user)
+const deleteUserbyID= async (req,res) =>{
+    const id = req.params.userID
 
-  } catch (error) {
-    console.log("Error while reading user id", id);
-    return res.send("Error")
-  }
+    try {
+        const user = await User.findByIdAndDelete(id)
+        res.json(user)
+        
+    } catch (error) {
+        console.log("Error while reading user id", id);
+        return res.send("Error")
+    }
 }
 
 
 
-module.exports = { addUser, deleteUserbyID, getUserbyID, getallUsers, loginUser }
+module.exports={addUser,deleteUserbyID, getUserbyID,getallUsers,loginUser}

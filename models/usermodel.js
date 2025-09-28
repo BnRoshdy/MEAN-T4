@@ -33,15 +33,8 @@ const userSchema = new Schema({
         type: String, 
         enum: ['user', 'admin'], 
         default: 'user' 
-    },
-    cart: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Carts'
-  }
-},{
-    collection:"Users",
-    timestamps:true
+    }
 })
 
-const User = mongoose.model("Users", userSchema)
+const User = mongoose.model("User", userSchema)
 module.exports = User
