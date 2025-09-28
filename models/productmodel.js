@@ -14,19 +14,20 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: [true, "Product price is required"],
-      min: [0, "Price must be greater than 0"],
+      min: [1, "Price must be greater than 0"],
     },
     category: {
-      type: String,
-      required: [true, "Category is required"],
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Categories',
+    required: true
+  },
     brand: {
       type: String,
       required: [true, "Brand is required"],
     },
     images: {
       type: [String], 
-      default: [],
+      required:[true, "Images is required"]
     },
     specifications: {
       type: Object, 
@@ -44,26 +45,17 @@ const productSchema = new mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    }
   },
   {
     versionKey: false,
+    collection:"Products",
+    timestamps:true
+
   }
 )
 
-productSchema.pre("save", function (next) {
-  this.updatedAt = new Date()
-  next()
-})
 
-const Product = mongoose.model("Product", productSchema)
+const Product = mongoose.model("Products", productSchema)
 
 module.exports = Product

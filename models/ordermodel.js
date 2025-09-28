@@ -5,15 +5,18 @@ const orderSchema = new Schema(
   {
     userId: {
       type: mongoose.Types.ObjectId,
-      ref: 'User',
+      ref: 'Users',
       required: true
     },
-    cartItems: [
+    purchasedItems: [
       {
         productId: {
           type: mongoose.Types.ObjectId,
-          ref: 'Product',
+          ref: 'Products',
           required: true
+        },
+        productname:{type:String,
+          required:true
         },
         quantity: {
           type: Number,
@@ -23,6 +26,9 @@ const orderSchema = new Schema(
         price: {
           type: Number,
           required: true
+        },
+        totalPrice:{type:Number,
+          required:true
         }
       }
     ],
@@ -39,23 +45,13 @@ const orderSchema = new Schema(
       type: String,
       enum: ['card', 'cash'],
       default: 'cash'
-    },
-    isPaid: {
-      type: Boolean,
-      default: false
-    },
-    paidAt: Date,
-    isDelivered: {
-      type: Boolean,
-      default: false
-    },
-    deliveredAt: Date
+    }
   },
   {
-    collection: 'Order',
+    collection: 'Orders',
     timestamps: true
   }
 );
 
-const orderModel = mongoose.model('Order', orderSchema);
+const orderModel = mongoose.model('Orders', orderSchema);
 module.exports = orderModel;

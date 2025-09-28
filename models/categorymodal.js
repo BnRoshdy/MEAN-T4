@@ -13,8 +13,9 @@ const categorySchema = new mongoose.Schema(
       default: ""
     }
   },
-  { timestamps: true }
+  { collection:"Categories",
+    timestamps: true }
 );
 
- const categoryshcema= mongoose.model("Category", categorySchema);
+ const categoryshcema= mongoose.model("Categories", categorySchema);
 module.exports=categoryshcema;
