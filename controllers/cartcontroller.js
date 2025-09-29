@@ -3,52 +3,50 @@ const Product = require('../models/productmodel');
 const mongoose = require("mongoose")
 
 
-
 const addToCart = async (req, res) => {
-  const { productId, quantity } = req.body;
+  const { products } = req.body;
 
-
-  if (!productId || !quantity || quantity <= 0) {
-    return res.status(400).json({ message: "Product ID and a valid quantity are required." });
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ message: "Products array is required." });
   }
 
   try {
-
     const userId = req.user._id;
-    const cart = await cartModel.findOne({ userId: userId });
+    let cart = await cartModel.findOne({ userId: userId });
+
     if (!cart) {
       return res.status(404).json({ message: "Cart not found for this user." });
     }
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found." });
+    for (const { productId, quantity } of products) {
+      if (!productId || !quantity || quantity <= 0) {
+        return res.status(400).json({ message: "Each product must have a valid productId and quantity." });
+      }
+
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: `Product with ID ${productId} not found.` });
+      }
+
+      const existingProductInCart = cart.products.find(
+        (item) => item.productData.toString() === productId
+      );
+
+      if (existingProductInCart) {
+        existingProductInCart.quantity += quantity;
+      } else {
+        cart.products.push({
+          productData: productId,
+          quantity: quantity,
+        });
+      }
     }
-
-
-    const existingProductInCart = cart.products.find(
-      (item) => item.productData.toString() === productId
-    );
-
-    if (existingProductInCart) {
-
-      existingProductInCart.quantity += quantity;
-    } else {
-
-      cart.products.push({
-        productData: productId,
-        quantity: quantity,
-
-      });
-    }
-
 
     await cart.save();
 
-
     res.status(200).json({
-      message: "Product added to cart successfully.",
-      updatedCart: cart
+      message: "Products added to cart successfully.",
+      updatedCart: cart,
     });
 
   } catch (err) {
@@ -56,6 +54,7 @@ const addToCart = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 
 
