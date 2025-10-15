@@ -5,7 +5,7 @@ const {authMiddleware,restrictTo }=require('../auth/auth')
 
 
 router.get('/allcart',authMiddleware,restrictTo ("admin","user"), showCart)
-router.post("/addToCart",authMiddleware,restrictTo ("admin","user"),addToCart)
+router.post("/add",authMiddleware,restrictTo ("admin","user"),addToCart)
 router.delete("/delete/:Id",authMiddleware,restrictTo ("admin","user"),deleteFromCart)
 
 
