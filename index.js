@@ -7,7 +7,8 @@ const categoeyRouter=require('./routes/categoryrouter')
 const productrouter=require('./routes/productrouter')
 const  { dataMiddleware, corsMiddleware }=require('./middlewares/middleware')
 const ordersRouter=require('./routes/orderrouter')
-
+const adminRoutes = require("./routes/adminRoutes");
+const {authMiddleware,restrictTo }=require('./auth/auth')
 
 require("dotenv").config();
 
@@ -24,6 +25,7 @@ app.use('/category',categoeyRouter)
 app.use('/user',userRouter)
 app.use('/products',productrouter)
 app.use('/order',ordersRouter)
+app.use("/dash/admin", authMiddleware, restrictTo("admin"), adminRoutes);
 
 
 
